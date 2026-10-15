@@ -36,6 +36,7 @@ export const RecentTransactionsList: React.FC<RecentTransactionsListProps> = ({
   useBengaliDigits = false,
   onSeeAll,
   onSelectTransaction,
+  onAddTransaction,
 }) => {
   const { t, language } = useTranslation();
 
