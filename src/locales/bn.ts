@@ -1,6 +1,6 @@
 export const bn = {
   // Navigation & Common
-  appTitle: 'ব্যক্তিগত ও পারিবারিক হিসাব',
+  appTitle: 'My Finance',
   navHome: 'হোম',
   navAccounts: 'হিসাব',
   navLoans: 'ঋণ',

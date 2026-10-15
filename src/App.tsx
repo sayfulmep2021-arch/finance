@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Download, Sparkles } from 'lucide-react';
+import { Download, Sparkles, RefreshCw } from 'lucide-react';
 import { db, initializeDatabase } from './db';
 import { I18nProvider } from './locales/i18nContext';
 import { TabType, BottomNav } from './components/layout/BottomNav';
@@ -37,9 +37,10 @@ export const MainApp: React.FC = () => {
   const [isBackupOpen, setIsBackupOpen] = useState(false);
   const [isInstallGuideOpen, setIsInstallGuideOpen] = useState(false);
 
-  // PWA Install State
+  // PWA Install & Update State
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isAppInstalled, setIsAppInstalled] = useState<boolean>(false);
+  const [hasAppUpdate, setHasAppUpdate] = useState<boolean>(false);
 
   useEffect(() => {
     // Check if launched as installed PWA
@@ -57,6 +58,27 @@ export const MainApp: React.FC = () => {
       setIsAppInstalled(true);
       setDeferredPrompt(null);
     });
+
+    // Detect Service Worker updates safely
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then((registration) => {
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          if (newWorker) {
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                setHasAppUpdate(true);
+              }
+            });
+          }
+        });
+      });
+
+      // Periodic check when app window regains focus
+      window.addEventListener('focus', () => {
+        navigator.serviceWorker.ready.then((reg) => reg.update().catch(() => {}));
+      });
+    }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
@@ -126,6 +148,27 @@ export const MainApp: React.FC = () => {
       {/* Phone Viewport Container */}
       <main className="flex-1 w-full max-w-md mx-auto px-4 pt-2 pb-8 bg-slate-50/50 dark:bg-slate-900/50 min-h-screen flex flex-col relative shadow-xl shadow-slate-200/50 dark:shadow-none">
         
+        {/* App Update Notification Banner */}
+        {hasAppUpdate && (
+          <div className="mb-2 p-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white flex items-center justify-between shadow-md shadow-emerald-500/20 animate-pulse">
+            <div className="flex items-center gap-2 min-w-0 pr-2">
+              <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+                <RefreshCw className="w-4 h-4 text-white" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-xs font-bold block truncate">My Finance-এর নতুন সংস্করণ প্রস্তুত!</span>
+                <span className="text-[10px] text-emerald-100 block truncate">নতুন আপডেট কার্যকর করতে রিলোড করুন</span>
+              </div>
+            </div>
+            <button
+              onClick={() => window.location.reload()}
+              className="flex-shrink-0 px-3.5 py-1.5 bg-white hover:bg-emerald-50 text-emerald-800 text-xs font-black rounded-xl shadow-sm active:scale-95 transition-all"
+            >
+              রিলোড
+            </button>
+          </div>
+        )}
+
         {/* Top Install Banner (appears when not running as standalone app) */}
         {!isAppInstalled && (
           <div className="mb-2 p-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-between shadow-md shadow-blue-500/20">

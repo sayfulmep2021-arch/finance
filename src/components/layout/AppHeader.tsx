@@ -60,9 +60,11 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-tr from-amber-200 to-amber-400 flex items-center justify-center text-slate-800 font-bold text-sm">
-              <UserIcon className="w-5 h-5 text-amber-900" />
-            </div>
+            <img
+              src="./app-logo.png"
+              alt={userName}
+              className="w-full h-full object-cover bg-white"
+            />
           )}
         </button>
       </div>

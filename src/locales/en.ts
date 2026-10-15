@@ -2,7 +2,7 @@ import { TranslationKey } from './bn';
 
 export const en: Record<TranslationKey, string> = {
   // Navigation & Common
-  appTitle: 'Personal & Family Finance',
+  appTitle: 'My Finance',
   navHome: 'Home',
   navAccounts: 'Accounts',
   navLoans: 'Loans',
