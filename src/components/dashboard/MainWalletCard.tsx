@@ -47,7 +47,7 @@ export const MainWalletCard: React.FC<MainWalletCardProps> = ({
             <button
               onClick={onIncomeClick}
               className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 text-xs font-semibold hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors focus:outline-none"
-              title="মোট আয়"
+              title={t('totalIncome')}
             >
               <span className="flex items-center justify-center w-4 h-4 rounded-full bg-emerald-500 text-white">
                 <ArrowUp className="w-2.5 h-2.5 stroke-[3]" />
@@ -59,7 +59,7 @@ export const MainWalletCard: React.FC<MainWalletCardProps> = ({
             <button
               onClick={onExpenseClick}
               className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 text-xs font-semibold hover:bg-rose-100 dark:hover:bg-rose-900/50 transition-colors focus:outline-none"
-              title="মোট ব্যয়"
+              title={t('totalExpense')}
             >
               <span className="flex items-center justify-center w-4 h-4 rounded-full bg-rose-500 text-white">
                 <ArrowDown className="w-2.5 h-2.5 stroke-[3]" />

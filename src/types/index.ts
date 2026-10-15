@@ -105,6 +105,15 @@ export interface SavingsGoal {
   memberId?: string;
 }
 
+export interface UserImage {
+  id: string;
+  dataUrl: string;
+  name: string;
+  size: number;
+  createdAt: string;
+  isPrimary?: boolean;
+}
+
 export interface AppSettings {
   id: string;
   userName: string;
@@ -116,4 +125,5 @@ export interface AppSettings {
   useBengaliDigits: boolean;
   hasCompletedOnboarding: boolean;
   budgetWarningPercent: number;
+  hasResetInitialData?: boolean;
 }

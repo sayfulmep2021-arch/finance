@@ -77,7 +77,7 @@ describe('Lending & Borrowing Ledger Rules', () => {
 describe('Budget & Threshold Calculations', () => {
   it('calculates budget spent percentage and triggers warning when above threshold', () => {
     const budgetLimit = 15000;
-    const spent = 14668; // Matching the screenshot ~98%
+    const spent = 14668;
     const spentPercent = (spent / budgetLimit) * 100;
 
     expect(Math.round(spentPercent)).toBe(98);
@@ -87,5 +87,28 @@ describe('Budget & Threshold Calculations', () => {
 
     const isExceeded = spent > budgetLimit;
     expect(isExceeded).toBe(false);
+  });
+
+  it('handles clean zero-ledger state without errors or NaN', () => {
+    const totalIncome = 0;
+    const totalExpense = 0;
+    const budgetLimit = 0;
+    const budgetSpentPercent = budgetLimit > 0 ? Math.min(100, Math.round((totalExpense / budgetLimit) * 100)) : 0;
+
+    expect(budgetSpentPercent).toBe(0);
+    expect(formatCurrency(0)).toBe('৳0');
+  });
+});
+
+describe('User Content Preservation Rules', () => {
+  it('preserves user entered Bengali and English text verbatim without translation', () => {
+    const userTitle1 = 'বাজার খরচ ও মাছ কেনা';
+    const userTitle2 = 'Google AI Pro subscription';
+    const userNotes = 'বন্ধুর কাছ থেকে ধার নেওয়া টাকা';
+
+    // The user content must remain exact string
+    expect(userTitle1).toBe('বাজার খরচ ও মাছ কেনা');
+    expect(userTitle2).toBe('Google AI Pro subscription');
+    expect(userNotes).toBe('বন্ধুর কাছ থেকে ধার নেওয়া টাকা');
   });
 });

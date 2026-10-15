@@ -19,7 +19,7 @@ export const ReportsScreen: React.FC<ReportsScreenProps> = ({
   currencySymbol,
   useBengaliDigits,
 }) => {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [period, setPeriod] = useState<'this_month' | 'all'>('this_month');
 
   const currentMonthKey = new Date().toISOString().slice(0, 7);
@@ -53,7 +53,7 @@ export const ReportsScreen: React.FC<ReportsScreenProps> = ({
       const cat = categories.find((c) => c.id === catId);
       return {
         id: catId,
-        name: cat?.nameBn || cat?.name || 'Other',
+        name: language === 'bn' ? (cat?.nameBn || cat?.name || 'অন্যান্য') : (cat?.name || cat?.nameBn || 'Other'),
         color: cat?.color || '#3B82F6',
         amount,
         percent: totalExpense > 0 ? (amount / totalExpense) * 100 : 0,

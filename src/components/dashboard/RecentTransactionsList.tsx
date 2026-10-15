@@ -12,6 +12,7 @@ import {
   Receipt,
   ShoppingCart,
   Coins,
+  Plus,
 } from 'lucide-react';
 import { Transaction } from '../../types';
 import { formatCurrency } from '../../utils/currency';
@@ -25,6 +26,7 @@ interface RecentTransactionsListProps {
   useBengaliDigits?: boolean;
   onSeeAll: () => void;
   onSelectTransaction: (tx: Transaction) => void;
+  onAddTransaction?: () => void;
 }
 
 export const RecentTransactionsList: React.FC<RecentTransactionsListProps> = ({
@@ -137,11 +139,27 @@ export const RecentTransactionsList: React.FC<RecentTransactionsListProps> = ({
 
       {/* List Items */}
       {transactions.length === 0 ? (
-        <div className="p-8 text-center rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800">
-          <Receipt className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2 stroke-[1.5]" />
-          <p className="text-xs font-medium text-slate-400 dark:text-slate-500">
-            {t('noTransactions')}
-          </p>
+        <div className="p-7 text-center rounded-3xl bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/60 shadow-xs space-y-3">
+          <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto">
+            <Receipt className="w-6 h-6 stroke-[1.75]" />
+          </div>
+          <div>
+            <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100">
+              {t('noTransactions')}
+            </h4>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 max-w-xs mx-auto">
+              {t('cleanLedgerSubtitle')}
+            </p>
+          </div>
+          {onAddTransaction && (
+            <button
+              onClick={onAddTransaction}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md shadow-blue-500/20 active:scale-95 transition-all"
+            >
+              <Plus className="w-4 h-4" />
+              <span>{t('addFirstTransaction')}</span>
+            </button>
+          )}
         </div>
       ) : (
         <div className="space-y-2.5">

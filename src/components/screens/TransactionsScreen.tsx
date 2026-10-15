@@ -73,10 +73,12 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
       <div className="flex items-center justify-between pt-3 pb-2 px-1">
         <div>
           <h1 className="text-xl font-extrabold text-slate-900 dark:text-white">
-            {t('navAccounts')} (লেনদেন তালিকা)
+            {t('navAccounts')}
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            মোট {filteredTransactions.length}টি লেনদেন পাওয়া গেছে
+            {language === 'bn'
+              ? `মোট ${filteredTransactions.length}টি লেনদেন`
+              : `${filteredTransactions.length} transactions`}
           </p>
         </div>
         <button
@@ -108,7 +110,7 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
         </div>
         <div className="text-center">
           <span className="text-[10px] font-bold text-slate-400 block uppercase">
-            স্থিতি
+            {language === 'bn' ? 'স্থিতি' : 'Net Balance'}
           </span>
           <span
             className={`text-xs font-bold block mt-1 ${
@@ -223,7 +225,7 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
                     {formatCurrency(tx.amount, currencySymbol, useBengaliDigits)}
                   </span>
                   <span className="text-[10px] text-slate-400 block mt-0.5">
-                    {tx.categoryNameBn || tx.categoryName}
+                    {language === 'bn' ? (tx.categoryNameBn || tx.categoryName) : (tx.categoryName || tx.categoryNameBn)}
                   </span>
                 </div>
               </button>

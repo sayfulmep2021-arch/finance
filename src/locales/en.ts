@@ -157,4 +157,23 @@ export const en: Record<TranslationKey, string> = {
   catFreelance: 'Freelancing',
   catGift: 'Gifts',
   catOther: 'Other',
+
+  // Smart Wallet & User Image
+  smartWalletSystem: 'Smart Wallet System',
+  userProfilePhoto: 'User Profile Photo',
+  uploadPhoto: 'Upload Photo',
+  changePhoto: 'Change Photo',
+  deletePhoto: 'Delete Photo',
+  choosePhoto: 'Choose image from device',
+  photoFormatHint: 'JPG, PNG or WebP format (Max 5MB)',
+  photoNoticePermanentLogo: 'Your uploaded image only appears on your profile. The official app icon remains permanent.',
+  deletePhotoConfirm: 'Are you sure you want to delete your profile photo?',
+  photoUpdatedSuccess: 'Profile photo updated successfully',
+  photoDeletedSuccess: 'Profile photo deleted successfully',
+  addFirstTransaction: 'Add First Transaction',
+  cleanLedgerSubtitle: 'No transactions yet. Tap below to record your first income or expense.',
+  notificationsAndAlerts: 'Notifications & Alerts',
+  notificationsEmpty: 'No new notifications or alerts at this time',
+  resetDataConfirm: 'Are you sure you want to clear all transactions, loans, and budget records to start fresh?',
+  resetDataSuccess: 'All data cleared successfully. Ledger is fresh.',
 };

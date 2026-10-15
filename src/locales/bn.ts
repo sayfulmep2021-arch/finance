@@ -155,6 +155,25 @@ export const bn = {
   catFreelance: 'ফ্রিল্যান্সিং',
   catGift: 'উপহার',
   catOther: 'অন্যান্য',
+
+  // Smart Wallet & User Image
+  smartWalletSystem: 'Smart Wallet System',
+  userProfilePhoto: 'ব্যবহারকারীর প্রোফাইল ছবি',
+  uploadPhoto: 'ছবি আপলোড করুন',
+  changePhoto: 'ছবি পরিবর্তন করুন',
+  deletePhoto: 'ছবি মুছে ফেলুন',
+  choosePhoto: 'ডিভাইস থেকে ছবি নির্বাচন করুন',
+  photoFormatHint: 'JPG, PNG বা WebP ফরম্যাট (সর্বোচ্চ ৫ MB)',
+  photoNoticePermanentLogo: 'আপনার ছবি শুধুমাত্র প্রোফাইলে প্রদর্শিত হবে। অ্যাপের মূল স্থায়ী লোগো অক্ষুণ্ণ থাকবে।',
+  deletePhotoConfirm: 'আপনি কি সত্যিই প্রোফাইল ছবিটি মুছে ফেলতে চান?',
+  photoUpdatedSuccess: 'প্রোফাইল ছবি সফলভাবে সংরক্ষিত হয়েছে',
+  photoDeletedSuccess: 'ছবি মুছে ফেলা হয়েছে',
+  addFirstTransaction: 'প্রথম লেনদেন যোগ করুন',
+  cleanLedgerSubtitle: 'কোনো লেনদেন যোগ করা হয়নি। নতুন হিসাব শুরু করতে প্রথম লেনদেন যোগ করুন।',
+  notificationsAndAlerts: 'নোটিফিকেশন ও আর্থিক অ্যালার্ট',
+  notificationsEmpty: 'আপাতত কোনো নতুন নোটিফিকেশন বা সতর্কতা নেই',
+  resetDataConfirm: 'আপনি কি নিশ্চিত যে সমস্ত লেনদেন, ধার ও বাজেট মুছে নতুন করে শুরু করতে চান?',
+  resetDataSuccess: 'সমস্ত ডেটা সফলভাবে মুছে নতুন হিসাব শুরু করা হয়েছে',
 };
 
 export type TranslationKey = keyof typeof bn;

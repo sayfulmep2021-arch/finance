@@ -21,7 +21,7 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
   loans,
   currencySymbol = '৳',
 }) => {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
 
   if (!isOpen) return null;
 
@@ -39,7 +39,7 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700">
           <h3 className="text-base font-bold text-slate-800 dark:text-white">
-            নোটিফিকেশন ও আর্থিক অ্যালার্ট
+            {t('notificationsAndAlerts')}
           </h3>
           <button
             onClick={onClose}
@@ -52,7 +52,7 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
         {/* Content */}
         <div className="p-6 space-y-3.5 max-h-[75vh] overflow-y-auto">
           {/* Budget Warning Alert */}
-          {isBudgetExceeded ? (
+          {budgetLimit > 0 && isBudgetExceeded ? (
             <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 flex gap-3.5 items-start">
               <div className="w-9 h-9 rounded-xl bg-rose-500 text-white flex items-center justify-center flex-shrink-0">
                 <AlertTriangle className="w-5 h-5" />
@@ -62,11 +62,13 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
                   {t('overBudgetWarning')}
                 </h4>
                 <p className="text-xs text-rose-600 dark:text-rose-300 mt-1">
-                  এই মাসে বাজেট ছিল {formatCurrency(budgetLimit, currencySymbol)}, কিন্তু খরচ হয়েছে {formatCurrency(monthlyExpense, currencySymbol)} ({Math.round(budgetSpentPercent)}%)!
+                  {language === 'bn'
+                    ? `এই মাসে বাজেট ছিল ${formatCurrency(budgetLimit, currencySymbol)}, কিন্তু খরচ হয়েছে ${formatCurrency(monthlyExpense, currencySymbol)} (${Math.round(budgetSpentPercent)}%)!`
+                    : `Budget limit was ${formatCurrency(budgetLimit, currencySymbol)}, but spent ${formatCurrency(monthlyExpense, currencySymbol)} (${Math.round(budgetSpentPercent)}%)!`}
                 </p>
               </div>
             </div>
-          ) : isBudgetWarning ? (
+          ) : budgetLimit > 0 && isBudgetWarning ? (
             <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 flex gap-3.5 items-start">
               <div className="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0">
                 <AlertTriangle className="w-5 h-5" />
@@ -76,7 +78,9 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
                   {t('nearBudgetWarning')}
                 </h4>
                 <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
-                  বাজেটের {Math.round(budgetSpentPercent)}% খরচ হয়ে গেছে। আর মাত্র {formatCurrency(Math.max(0, budgetLimit - monthlyExpense), currencySymbol)} অবশিষ্ট আছে।
+                  {language === 'bn'
+                    ? `বাজেটের ${Math.round(budgetSpentPercent)}% খরচ হয়ে গেছে। আর মাত্র ${formatCurrency(Math.max(0, budgetLimit - monthlyExpense), currencySymbol)} অবশিষ্ট আছে।`
+                    : `${Math.round(budgetSpentPercent)}% of budget spent. Only ${formatCurrency(Math.max(0, budgetLimit - monthlyExpense), currencySymbol)} remaining.`}
                 </p>
               </div>
             </div>
@@ -84,7 +88,7 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
             <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 flex items-center gap-3">
               <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
               <p className="text-xs text-emerald-800 dark:text-emerald-300 font-medium">
-                বাজেট নিয়ন্ত্রণে আছে ({Math.round(budgetSpentPercent)}% ব্যবহৃত)।
+                {language === 'bn' ? 'বাজেট নিয়ন্ত্রণে আছে এবং কোনো অতিরিক্ত ব্যয় নেই।' : 'Budget is under control with no overspending.'}
               </p>
             </div>
           )}
@@ -93,7 +97,7 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
           {activeLoans.length > 0 && (
             <div className="space-y-2 pt-2">
               <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                চলমান ধার ও ঋণের তাগাদা
+                {language === 'bn' ? 'চলমান ধার ও ঋণের তাগাদা' : 'Active Loan Reminders'}
               </h4>
               {activeLoans.map((loan) => {
                 const remaining = loan.amount - loan.repaidAmount;
@@ -110,7 +114,7 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
                           {loan.personName}
                         </span>
                         <span className="text-[11px] text-slate-500 block">
-                          {isLent ? 'পাওনা বাকি' : 'দেনা বাকি'}: {formatCurrency(remaining, currencySymbol)}
+                          {isLent ? (language === 'bn' ? 'পাওনা বাকি' : 'Receivable') : (language === 'bn' ? 'দেনা বাকি' : 'Payable')}: {formatCurrency(remaining, currencySymbol)}
                         </span>
                       </div>
                     </div>

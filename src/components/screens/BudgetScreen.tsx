@@ -31,18 +31,24 @@ export const BudgetScreen: React.FC<BudgetScreenProps> = ({
   const monthName = getMonthDisplay(monthKey, language);
 
   const [isEditingLimit, setIsEditingLimit] = useState(false);
-  const [newLimit, setNewLimit] = useState<string>(String(budget?.overallLimit || 15000));
+  const [newLimit, setNewLimit] = useState<string>(budget?.overallLimit ? String(budget.overallLimit) : '15000');
+
+  React.useEffect(() => {
+    if (budget?.overallLimit) {
+      setNewLimit(String(budget.overallLimit));
+    }
+  }, [budget?.overallLimit]);
 
   // Current month expenses
   const currentMonthExpenses = transactions
     .filter((t) => t.type === 'expense' && t.date.startsWith(monthKey))
     .reduce((s, t) => s + t.amount, 0);
 
-  const overallLimit = budget?.overallLimit || 15000;
+  const overallLimit = budget?.overallLimit || 0;
   const remaining = Math.max(0, overallLimit - currentMonthExpenses);
-  const percentSpent = Math.min(100, (currentMonthExpenses / overallLimit) * 100);
-  const isOverBudget = currentMonthExpenses > overallLimit;
-  const isNearBudget = percentSpent >= (budget?.warningThresholdPercent || 80);
+  const percentSpent = overallLimit > 0 ? Math.min(100, (currentMonthExpenses / overallLimit) * 100) : 0;
+  const isOverBudget = overallLimit > 0 && currentMonthExpenses > overallLimit;
+  const isNearBudget = overallLimit > 0 && percentSpent >= (budget?.warningThresholdPercent || 80);
 
   // Category wise spend vs limit
   const categoryExpenses: Record<string, number> = {};

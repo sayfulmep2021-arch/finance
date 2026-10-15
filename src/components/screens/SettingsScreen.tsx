@@ -12,7 +12,7 @@ import {
   Plus,
   Trash2,
 } from 'lucide-react';
-import { db } from '../../db';
+import { db, resetDatabaseToCleanState } from '../../db';
 import { AppSettings, FamilyMember } from '../../types';
 import { useTranslation } from '../../locales/i18nContext';
 
@@ -21,6 +21,7 @@ interface SettingsScreenProps {
   members: FamilyMember[];
   onOpenBackupModal: () => void;
   onOpenInstallGuide?: () => void;
+  onOpenUserImage?: () => void;
   onDataChanged: () => void;
 }
 
@@ -29,21 +30,29 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   members,
   onOpenBackupModal,
   onOpenInstallGuide,
+  onOpenUserImage,
   onDataChanged,
 }) => {
   const { t, language, setLanguage } = useTranslation();
 
-  const [userName, setUserName] = useState(settings?.userName || 'Shaikat');
+  const [userName, setUserName] = useState(settings?.userName || 'Sayful');
   const [currency, setCurrency] = useState(settings?.currencySymbol || '৳');
   const [isSavedNotice, setIsSavedNotice] = useState(false);
   const [newMemberName, setNewMemberName] = useState('');
+
+  // Sync state if settings prop changes
+  React.useEffect(() => {
+    if (settings?.userName) {
+      setUserName(settings.userName);
+    }
+  }, [settings?.userName]);
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await db.settings.put({
         ...settings,
-        userName: userName.trim() || 'Shaikat',
+        userName: userName.trim() || 'Sayful',
         currencySymbol: currency,
       });
       setIsSavedNotice(true);
@@ -51,6 +60,17 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       onDataChanged();
     } catch (err: any) {
       alert(`সেটিংস সংরক্ষণে ত্রুটি: ${err.message}`);
+    }
+  };
+
+  const handleResetData = async () => {
+    if (!confirm(t('resetDataConfirm'))) return;
+    try {
+      await resetDatabaseToCleanState();
+      alert(t('resetDataSuccess'));
+      onDataChanged();
+    } catch (err: any) {
+      alert(`ডেটা রিসেট করতে সমস্যা: ${err.message}`);
     }
   };
 
@@ -108,6 +128,33 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           <User className="w-4 h-4 text-blue-600" />
           <span>{t('profileSettings')}</span>
         </h3>
+
+        {/* User Photo Preview & Change */}
+        <div className="flex items-center gap-3.5 pb-2 border-b border-slate-100 dark:border-slate-700/80">
+          <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white dark:border-slate-700 shadow-sm ring-2 ring-blue-500/20 bg-slate-100 dark:bg-slate-700 flex-shrink-0">
+            {settings?.userAvatar ? (
+              <img src={settings.userAvatar} alt={userName} className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-slate-400">
+                <User className="w-6 h-6" />
+              </div>
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <span className="text-xs font-bold text-slate-900 dark:text-white block truncate">
+              {userName}
+            </span>
+            {onOpenUserImage && (
+              <button
+                type="button"
+                onClick={onOpenUserImage}
+                className="mt-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 flex items-center gap-1 focus:outline-none"
+              >
+                <span>{settings?.userAvatar ? t('changePhoto') : t('uploadPhoto')}</span>
+              </button>
+            )}
+          </div>
+        </div>
 
         <form onSubmit={handleSaveProfile} className="space-y-3">
           <div>
@@ -265,6 +312,25 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           ✓ কোনো APK ডাউনলোড বা আপডেট ঝামেলা নেই।
           <br />✓ একবার ইনস্টল করার পর সম্পূর্ণ অফলাইনে চলবে।
         </div>
+      </div>
+
+      {/* Danger Zone: Reset Data */}
+      <div className="p-5 rounded-3xl bg-rose-50/50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30 shadow-xs space-y-3">
+        <h3 className="text-sm font-bold text-rose-700 dark:text-rose-400 flex items-center gap-2">
+          <Trash2 className="w-4 h-4 text-rose-600" />
+          <span>{t('resetData')}</span>
+        </h3>
+        <p className="text-xs text-rose-600/80 dark:text-rose-400/80">
+          {language === 'bn'
+            ? 'সমস্ত লেনদেন, ঋণ ও বাজেট মুছে ফেলে সম্পূর্ণ পরিষ্কার (৳০) খাতা শুরু করতে নিচের বাটনে চাপ দিন।'
+            : 'Clear all transactions, loans, and budget records to reset the ledger back to zero.'}
+        </p>
+        <button
+          onClick={handleResetData}
+          className="w-full py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-xs active:scale-95 transition-all"
+        >
+          {t('resetData')}
+        </button>
       </div>
     </div>
   );

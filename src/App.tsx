@@ -16,6 +16,7 @@ import { QuickActionSheet } from './components/modals/QuickActionSheet';
 import { NotificationsModal } from './components/modals/NotificationsModal';
 import { BackupRestoreModal } from './components/modals/BackupRestoreModal';
 import { InstallGuideModal } from './components/modals/InstallGuideModal';
+import { UserImageModal } from './components/modals/UserImageModal';
 import { Transaction, TransactionType, WalletAccount, LoanType } from './types';
 import { ToggleFilter } from './components/dashboard/IncomeExpenseToggle';
 
@@ -36,6 +37,7 @@ export const MainApp: React.FC = () => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isBackupOpen, setIsBackupOpen] = useState(false);
   const [isInstallGuideOpen, setIsInstallGuideOpen] = useState(false);
+  const [isUserImageOpen, setIsUserImageOpen] = useState(false);
 
   // PWA Install & Update State
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -119,7 +121,7 @@ export const MainApp: React.FC = () => {
 
   const currencySymbol = settings?.currencySymbol || '৳';
   const useBengaliDigits = settings?.useBengaliDigits || false;
-  const userName = settings?.userName || 'Shaikat';
+  const userName = settings?.userName || 'Sayful';
 
   // Calculate current month expenses for budget and alerts
   const monthlyExpense = transactions
@@ -212,6 +214,7 @@ export const MainApp: React.FC = () => {
               setActiveTab('accounts');
             }}
             onOpenNotifications={() => setIsNotificationsOpen(true)}
+            onOpenUserImage={() => setIsUserImageOpen(true)}
             onOpenSettings={() => setActiveTab('settings')}
             onOpenQuickAdd={handleOpenQuickAdd}
           />
@@ -273,7 +276,7 @@ export const MainApp: React.FC = () => {
           <SettingsScreen
             settings={settings || {
               id: 'app_settings',
-              userName: 'Shaikat',
+              userName: 'Sayful',
               currency: 'BDT',
               currencySymbol: '৳',
               language: 'bn',
@@ -285,6 +288,7 @@ export const MainApp: React.FC = () => {
             members={members}
             onOpenBackupModal={() => setIsBackupOpen(true)}
             onOpenInstallGuide={handleInstallApp}
+            onOpenUserImage={() => setIsUserImageOpen(true)}
             onDataChanged={refreshData}
           />
         )}
@@ -349,6 +353,14 @@ export const MainApp: React.FC = () => {
         onClose={() => setIsInstallGuideOpen(false)}
         onInstallClick={handleInstallApp}
         canPromptDirectly={!!deferredPrompt}
+      />
+
+      <UserImageModal
+        isOpen={isUserImageOpen}
+        onClose={() => setIsUserImageOpen(false)}
+        userName={userName}
+        currentAvatarUrl={settings?.userAvatar}
+        onImageChanged={refreshData}
       />
     </div>
   );

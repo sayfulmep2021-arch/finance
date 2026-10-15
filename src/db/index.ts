@@ -9,6 +9,7 @@ import {
   Budget,
   SavingsGoal,
   AppSettings,
+  UserImage,
 } from '../types';
 
 export class FinanceDatabase extends Dexie {
@@ -21,6 +22,7 @@ export class FinanceDatabase extends Dexie {
   budgets!: Table<Budget, string>;
   savingsGoals!: Table<SavingsGoal, string>;
   settings!: Table<AppSettings, string>;
+  userImages!: Table<UserImage, string>;
 
   constructor() {
     super('PersonalFinanceDB');
@@ -34,6 +36,9 @@ export class FinanceDatabase extends Dexie {
       budgets: 'id, month',
       savingsGoals: 'id, name, isCompleted',
       settings: 'id',
+    });
+    this.version(2).stores({
+      userImages: 'id, createdAt, isPrimary',
     });
   }
 }
@@ -134,14 +139,99 @@ export const defaultCategories: Category[] = [
   },
 ];
 
-// Initialize and seed default database state matching the user's uploaded mockup
+// Clean database reset helper
+export async function resetDatabaseToCleanState() {
+  await db.transactions.clear();
+  await db.loans.clear();
+  await db.loanRepayments.clear();
+  await db.budgets.clear();
+  await db.savingsGoals.clear();
+
+  // Reset all wallets to 0
+  const allWallets = await db.wallets.toArray();
+  for (const w of allWallets) {
+    await db.wallets.update(w.id, { balance: 0 });
+  }
+
+  // Ensure default main wallet exists with 0 balance
+  const mainWallet = await db.wallets.get('wallet_main');
+  if (!mainWallet) {
+    await db.wallets.add({
+      id: 'wallet_main',
+      name: 'Main Wallet',
+      nameBn: 'মেইন ওয়ালেট',
+      type: 'main',
+      balance: 0,
+      icon: 'wallet',
+      color: '#2563EB',
+      isDefault: true,
+      createdAt: new Date().toISOString(),
+    });
+  }
+
+  // Update settings with userName 'Sayful' and flag hasResetInitialData
+  const currentSettings = await db.settings.get('app_settings');
+  if (currentSettings) {
+    await db.settings.update('app_settings', {
+      userName: (!currentSettings.userName || currentSettings.userName === 'Shaikat') ? 'Sayful' : currentSettings.userName,
+      hasResetInitialData: true,
+    });
+  }
+
+  // Ensure Sayful family member exists
+  const sayfulMember = await db.familyMembers.filter((m) => m.name === 'Sayful').first();
+  if (!sayfulMember) {
+    await db.familyMembers.add({
+      id: 'member_sayful',
+      name: 'Sayful',
+      role: 'self',
+      avatarColor: '#2563EB',
+      createdAt: new Date().toISOString(),
+    });
+  }
+}
+
+// User Profile Image DB Helpers
+export async function saveUserImage(dataUrl: string, name: string, size: number): Promise<UserImage> {
+  const newImage: UserImage = {
+    id: `img_${Date.now()}`,
+    dataUrl,
+    name,
+    size,
+    createdAt: new Date().toISOString(),
+    isPrimary: true,
+  };
+  // Demote previous primary images
+  await db.userImages.toCollection().modify({ isPrimary: false });
+  await db.userImages.add(newImage);
+  await db.settings.update('app_settings', { userAvatar: dataUrl });
+  return newImage;
+}
+
+export async function deleteUserImage(id?: string): Promise<void> {
+  if (id) {
+    await db.userImages.delete(id);
+  } else {
+    await db.userImages.clear();
+  }
+  const remaining = await db.userImages.orderBy('createdAt').reverse().first();
+  if (remaining) {
+    await db.userImages.update(remaining.id, { isPrimary: true });
+    await db.settings.update('app_settings', { userAvatar: remaining.dataUrl });
+  } else {
+    await db.settings.update('app_settings', { userAvatar: undefined });
+  }
+}
+
+// Initialize database with clean ledger and ensure one-time reset migration
 export async function initializeDatabase() {
   const settingsCount = await db.settings.count();
+
   if (settingsCount === 0) {
-    // Seed App Settings
+    // 1. Fresh installation: Seed settings with Sayful and clean ledger
     await db.settings.add({
       id: 'app_settings',
-      userName: 'Shaikat',
+      userName: 'Sayful',
       currency: 'BDT',
       currencySymbol: '৳',
       language: 'bn',
@@ -149,14 +239,14 @@ export async function initializeDatabase() {
       useBengaliDigits: false,
       hasCompletedOnboarding: true,
       budgetWarningPercent: 80,
+      hasResetInitialData: true,
     });
 
-    // Seed Family Members
-    const shaikatId = 'member_shaikat';
+    // Seed Family Members with Sayful
     await db.familyMembers.bulkAdd([
       {
-        id: shaikatId,
-        name: 'Shaikat',
+        id: 'member_sayful',
+        name: 'Sayful',
         role: 'self',
         avatarColor: '#2563EB',
         createdAt: new Date().toISOString(),
@@ -170,214 +260,29 @@ export async function initializeDatabase() {
       },
     ]);
 
-    // Seed Wallets matching image: Main Wallet (৳2,146), EBL (৳96,202), Bkash (৳22,417)
+    // Seed Main Wallet with 0 balance
     await db.wallets.bulkAdd([
       {
         id: 'wallet_main',
         name: 'Main Wallet',
         nameBn: 'মেইন ওয়ালেট',
         type: 'main',
-        balance: 2146,
+        balance: 0,
         icon: 'wallet',
         color: '#2563EB',
         isDefault: true,
         createdAt: new Date().toISOString(),
       },
-      {
-        id: 'wallet_ebl',
-        name: 'EBL',
-        nameBn: 'EBL',
-        type: 'bank',
-        bankName: 'Eastern Bank Ltd',
-        balance: 96202,
-        icon: 'credit-card',
-        color: '#0066B2',
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: 'wallet_bkash',
-        name: 'Bkash',
-        nameBn: 'Bkash',
-        type: 'mfs',
-        balance: 22417,
-        icon: 'smartphone',
-        color: '#E2136E',
-        createdAt: new Date().toISOString(),
-      },
     ]);
 
-    // Seed Categories
+    // Seed default categories
     await db.categories.bulkAdd(defaultCategories);
+    return;
+  }
 
-    // Current month dates
-    const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().split('T')[0];
-    const monthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
-
-    // Seed Transactions matching screenshot items:
-    // Income: +৳19,032
-    // Expense: -৳14,668
-    // Result balance: ৳4,364 / adjusted to ৳2,146
-    await db.transactions.bulkAdd([
-      {
-        id: 'tx_inc_salary',
-        type: 'income',
-        amount: 19032,
-        categoryId: 'cat_salary',
-        categoryName: 'Salary',
-        categoryNameBn: 'মাসিক বেতন',
-        walletId: 'wallet_main',
-        memberId: shaikatId,
-        title: 'অক্টোবর মাসের বেতন',
-        date: `${monthKey}-01`,
-        paymentMethod: 'bank',
-        createdAt: `${monthKey}-01T09:00:00Z`,
-      },
-      {
-        id: 'tx_exp_groceries_prev',
-        type: 'expense',
-        amount: 12718,
-        categoryId: 'cat_food',
-        categoryName: 'Food & Dining',
-        categoryNameBn: 'মাসিক বাজার ও পারিবারিক খরচ',
-        walletId: 'wallet_main',
-        memberId: shaikatId,
-        title: 'মাসিক পারিবারিক বাজার',
-        date: `${monthKey}-05`,
-        paymentMethod: 'cash',
-        createdAt: `${monthKey}-05T14:00:00Z`,
-      },
-      {
-        id: 'tx_exp_google',
-        type: 'expense',
-        amount: 250,
-        categoryId: 'cat_google_ai',
-        categoryName: 'Google AI Pro',
-        categoryNameBn: 'Google ai pro',
-        walletId: 'wallet_main',
-        memberId: shaikatId,
-        title: 'Google ai pro',
-        date: yesterdayStr,
-        paymentMethod: 'card',
-        createdAt: `${yesterdayStr}T18:00:00Z`,
-      },
-      {
-        id: 'tx_exp_shampoo',
-        type: 'expense',
-        amount: 40,
-        categoryId: 'cat_shampoo',
-        categoryName: 'Personal Care',
-        categoryNameBn: 'শ্যাম্পু',
-        walletId: 'wallet_main',
-        memberId: shaikatId,
-        title: 'শ্যাম্পু',
-        date: yesterdayStr,
-        paymentMethod: 'cash',
-        createdAt: `${yesterdayStr}T15:30:00Z`,
-      },
-      {
-        id: 'tx_exp_fish',
-        type: 'expense',
-        amount: 1500,
-        categoryId: 'cat_fish',
-        categoryName: 'Fish & Groceries',
-        categoryNameBn: 'মাছ',
-        walletId: 'wallet_main',
-        memberId: shaikatId,
-        title: 'মাছ',
-        date: todayStr,
-        paymentMethod: 'cash',
-        createdAt: `${todayStr}T10:15:00Z`,
-      },
-      {
-        id: 'tx_exp_tea',
-        type: 'expense',
-        amount: 160,
-        categoryId: 'cat_tea',
-        categoryName: 'Tea & Snacks',
-        categoryNameBn: 'বন্ধুদের সাথে চা',
-        walletId: 'wallet_main',
-        memberId: shaikatId,
-        title: 'বন্ধুদের সাথে চা',
-        date: todayStr,
-        paymentMethod: 'bkash',
-        createdAt: `${todayStr}T11:45:00Z`,
-      },
-    ]);
-
-    // Seed Budget: ৳15,000 monthly limit (with ৳14,668 spent = 97.8% ~ 98%, exact match!)
-    await db.budgets.add({
-      id: `budget_${monthKey}`,
-      month: monthKey,
-      overallLimit: 15000,
-      categoryLimits: {
-        cat_tea: 1500,
-        cat_fish: 5000,
-        cat_food: 13000,
-        cat_google_ai: 500,
-      },
-      warningThresholdPercent: 80,
-      updatedAt: new Date().toISOString(),
-    });
-
-    // Seed sample loan and savings goals
-    await db.loans.bulkAdd([
-      {
-        id: 'loan_1',
-        type: 'lent',
-        personName: 'আরিফ ভাই',
-        personPhone: '01712345678',
-        amount: 5000,
-        repaidAmount: 2000,
-        walletId: 'wallet_bkash',
-        date: `${monthKey}-02`,
-        dueDate: `${monthKey}-28`,
-        notes: 'জরুরি প্রয়োজনে দিয়েছি',
-        status: 'partially_paid',
-        createdAt: `${monthKey}-02T12:00:00Z`,
-      },
-      {
-        id: 'loan_2',
-        type: 'borrowed',
-        personName: 'রাকিব আহমেদ',
-        personPhone: '01898765432',
-        amount: 3000,
-        repaidAmount: 0,
-        walletId: 'wallet_main',
-        date: `${monthKey}-04`,
-        dueDate: `${monthKey}-25`,
-        notes: 'অফিসের কাজে নিয়েছিলাম',
-        status: 'active',
-        createdAt: `${monthKey}-04T16:00:00Z`,
-      },
-    ]);
-
-    await db.savingsGoals.bulkAdd([
-      {
-        id: 'goal_emergency',
-        name: 'জরুরি ফান্ড (Emergency)',
-        targetAmount: 50000,
-        currentAmount: 25000,
-        targetDate: `${today.getFullYear()}-12-31`,
-        color: '#10B981',
-        icon: 'shield-check',
-        isCompleted: false,
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: 'goal_tour',
-        name: 'সাজেক ট্যুর সঞ্চয়',
-        targetAmount: 15000,
-        currentAmount: 9500,
-        targetDate: `${today.getFullYear()}-11-30`,
-        color: '#F59E0B',
-        icon: 'compass',
-        isCompleted: false,
-        createdAt: new Date().toISOString(),
-      },
-    ]);
+  // 2. Existing installation: Run one-time migration to clear demo data if not yet reset
+  const currentSettings = await db.settings.get('app_settings');
+  if (!currentSettings?.hasResetInitialData) {
+    await resetDatabaseToCleanState();
   }
 }
