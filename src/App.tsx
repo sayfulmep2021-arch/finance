@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { Download, Sparkles } from 'lucide-react';
 import { db, initializeDatabase } from './db';
 import { I18nProvider } from './locales/i18nContext';
 import { TabType, BottomNav } from './components/layout/BottomNav';
@@ -14,6 +15,7 @@ import { AddLoanModal } from './components/modals/AddLoanModal';
 import { QuickActionSheet } from './components/modals/QuickActionSheet';
 import { NotificationsModal } from './components/modals/NotificationsModal';
 import { BackupRestoreModal } from './components/modals/BackupRestoreModal';
+import { InstallGuideModal } from './components/modals/InstallGuideModal';
 import { Transaction, TransactionType, WalletAccount, LoanType } from './types';
 import { ToggleFilter } from './components/dashboard/IncomeExpenseToggle';
 
@@ -33,6 +35,46 @@ export const MainApp: React.FC = () => {
   const [isQuickActionOpen, setIsQuickActionOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isBackupOpen, setIsBackupOpen] = useState(false);
+  const [isInstallGuideOpen, setIsInstallGuideOpen] = useState(false);
+
+  // PWA Install State
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isAppInstalled, setIsAppInstalled] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Check if launched as installed PWA
+    if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone) {
+      setIsAppInstalled(true);
+    }
+
+    const handleBeforeInstall = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    window.addEventListener('appinstalled', () => {
+      setIsAppInstalled(true);
+      setDeferredPrompt(null);
+    });
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+    };
+  }, []);
+
+  const handleInstallApp = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      if (choice.outcome === 'accepted') {
+        setIsAppInstalled(true);
+      }
+      setDeferredPrompt(null);
+    } else {
+      setIsInstallGuideOpen(true);
+    }
+  };
 
   // Initialize DB on first mount
   useEffect(() => {
@@ -82,7 +124,29 @@ export const MainApp: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-100/60 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200">
       {/* Phone Viewport Container */}
-      <main className="flex-1 w-full max-w-md mx-auto px-4 pt-3 pb-8 bg-slate-50/50 dark:bg-slate-900/50 min-h-screen flex flex-col relative shadow-xl shadow-slate-200/50 dark:shadow-none">
+      <main className="flex-1 w-full max-w-md mx-auto px-4 pt-2 pb-8 bg-slate-50/50 dark:bg-slate-900/50 min-h-screen flex flex-col relative shadow-xl shadow-slate-200/50 dark:shadow-none">
+        
+        {/* Top Install Banner (appears when not running as standalone app) */}
+        {!isAppInstalled && (
+          <div className="mb-2 p-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-between shadow-md shadow-blue-500/20">
+            <div className="flex items-center gap-2 min-w-0 pr-2">
+              <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+                <Download className="w-4 h-4 text-white" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-xs font-bold block truncate">ফোনে অ্যাপ ইনস্টল করুন</span>
+                <span className="text-[10px] text-blue-100 block truncate">ইন্টারনেট ছাড়া অফলাইনে ব্যবহার করুন</span>
+              </div>
+            </div>
+            <button
+              onClick={handleInstallApp}
+              className="flex-shrink-0 px-3.5 py-1.5 bg-white hover:bg-blue-50 text-blue-700 text-xs font-black rounded-xl shadow-sm active:scale-95 transition-all"
+            >
+              ইনস্টল
+            </button>
+          </div>
+        )}
+
         {/* Active Tab Screen */}
         {activeTab === 'home' && (
           <DashboardScreen
@@ -102,11 +166,10 @@ export const MainApp: React.FC = () => {
               setIsAddTxOpen(true);
             }}
             onSelectWallet={(w) => {
-              // Open transfer or filtered transactions
               setActiveTab('accounts');
             }}
             onOpenNotifications={() => setIsNotificationsOpen(true)}
-            onOpenSettings={() => setActiveTab('home' ? 'settings' : 'home')}
+            onOpenSettings={() => setActiveTab('settings')}
             onOpenQuickAdd={handleOpenQuickAdd}
           />
         )}
@@ -178,6 +241,7 @@ export const MainApp: React.FC = () => {
             }}
             members={members}
             onOpenBackupModal={() => setIsBackupOpen(true)}
+            onOpenInstallGuide={handleInstallApp}
             onDataChanged={refreshData}
           />
         )}
@@ -235,6 +299,13 @@ export const MainApp: React.FC = () => {
         onClose={() => setIsBackupOpen(false)}
         transactions={transactions}
         onDataChanged={refreshData}
+      />
+
+      <InstallGuideModal
+        isOpen={isInstallGuideOpen}
+        onClose={() => setIsInstallGuideOpen(false)}
+        onInstallClick={handleInstallApp}
+        canPromptDirectly={!!deferredPrompt}
       />
     </div>
   );

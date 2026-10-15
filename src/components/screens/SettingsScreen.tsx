@@ -20,6 +20,7 @@ interface SettingsScreenProps {
   settings: AppSettings;
   members: FamilyMember[];
   onOpenBackupModal: () => void;
+  onOpenInstallGuide?: () => void;
   onDataChanged: () => void;
 }
 
@@ -27,6 +28,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   settings,
   members,
   onOpenBackupModal,
+  onOpenInstallGuide,
   onDataChanged,
 }) => {
   const { t, language, setLanguage } = useTranslation();
@@ -252,6 +254,13 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
           {t('installGuide')}
         </p>
+        <button
+          onClick={onOpenInstallGuide}
+          className="w-full py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs shadow-md shadow-blue-500/25 flex items-center justify-center gap-2 active:scale-95 transition-all"
+        >
+          <Smartphone className="w-4 h-4" />
+          <span>এখনই ফোনে ইনস্টল করুন</span>
+        </button>
         <div className="p-3 rounded-2xl bg-white/80 dark:bg-slate-900/50 text-[11px] font-medium text-slate-600 dark:text-slate-400">
           ✓ কোনো APK ডাউনলোড বা আপডেট ঝামেলা নেই।
           <br />✓ একবার ইনস্টল করার পর সম্পূর্ণ অফলাইনে চলবে।
