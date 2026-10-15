@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563EB" />
+      <stop offset="100%" stop-color="#00B4D8" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="128" fill="url(#grad)" />
+  <circle cx="256" cy="256" r="180" fill="white" opacity="0.12" />
+  <!-- Taka / Wallet Icon -->
+  <path d="M120 180c0-22.1 17.9-40 40-40h200c22.1 0 40 17.9 40 40v160c0 22.1-17.9 40-40 40H160c-22.1 0-40-17.9-40-40V180z" fill="white" fill-opacity="0.95" />
+  <path d="M360 230h44c11 0 20 9 20 20v20c0 11-9 20-20 20h-44v-60z" fill="#2563EB" />
+  <circle cx="380" cy="260" r="8" fill="white" />
+  <!-- Bengali Taka Symbol ৳ -->
+  <text x="235" y="295" font-family="'Hind Siliguri', 'Segoe UI', sans-serif" font-size="120" font-weight="900" fill="#2563EB" text-anchor="middle">৳</text>
+</svg>
