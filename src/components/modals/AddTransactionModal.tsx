@@ -278,6 +278,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
+                      data-testid="btn-add-category"
                       onClick={() => setIsCategoryModalOpen(true)}
                       className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 flex items-center gap-1 focus:outline-none"
                     >
@@ -287,6 +288,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                     <span className="text-slate-300 dark:text-slate-600">•</span>
                     <button
                       type="button"
+                      data-testid="btn-manage-categories-tx"
                       onClick={() => setIsCategoryModalOpen(true)}
                       className="text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center gap-1 focus:outline-none"
                     >

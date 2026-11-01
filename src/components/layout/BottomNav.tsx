@@ -58,6 +58,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
             return (
               <button
                 key={item.id}
+                data-testid={`bottom-nav-${item.id}`}
                 onClick={() => onChangeTab(item.id)}
                 className={`flex flex-col items-center justify-center py-1 px-1.5 min-w-[50px] rounded-xl transition-all duration-150 focus:outline-none active:scale-95 ${
                   isActive

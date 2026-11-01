@@ -193,6 +193,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         {onOpenCategoriesModal && (
           <button
             type="button"
+            data-testid="btn-manage-categories"
             onClick={onOpenCategoriesModal}
             className="w-full py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-bold text-xs flex items-center justify-center gap-2 border border-blue-200/70 dark:border-blue-900/50 transition-colors"
           >
