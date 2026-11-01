@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Filter, Plus, ArrowUpRight, ArrowDownLeft, ArrowLeftRight } from 'lucide-react';
+import { Search, Plus, ArrowUpRight, ArrowDownLeft, ArrowLeftRight } from 'lucide-react';
 import { Transaction, WalletAccount, Category, FamilyMember } from '../../types';
 import { formatCurrency } from '../../utils/currency';
 import { formatRelativeDate } from '../../utils/date';
@@ -41,6 +41,7 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
         tx.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (tx.notes && tx.notes.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (tx.categoryNameBn && tx.categoryNameBn.includes(searchTerm)) ||
+        (tx.categoryName && tx.categoryName.toLowerCase().includes(searchTerm.toLowerCase())) ||
         String(tx.amount).includes(searchTerm);
 
       // Type
@@ -76,9 +77,7 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
             {t('navAccounts')}
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            {language === 'bn'
-              ? `মোট ${filteredTransactions.length}টি লেনদেন`
-              : `${filteredTransactions.length} transactions`}
+            {filteredTransactions.length} {t('totalTransactionsCount')}
           </p>
         </div>
         <button
@@ -110,7 +109,7 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
         </div>
         <div className="text-center">
           <span className="text-[10px] font-bold text-slate-400 block uppercase">
-            {language === 'bn' ? 'স্থিতি' : 'Net Balance'}
+            {t('netBalance')}
           </span>
           <span
             className={`text-xs font-bold block mt-1 ${
@@ -161,13 +160,15 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
       <div className="space-y-2.5">
         {filteredTransactions.length === 0 ? (
           <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
-            <p className="text-xs font-medium text-slate-400">কোনো লেনদেন পাওয়া যায়নি</p>
+            <p className="text-xs font-medium text-slate-400">{t('noTransactionsFound')}</p>
           </div>
         ) : (
           filteredTransactions.map((tx) => {
             const wallet = wallets.find((w) => w.id === tx.walletId);
             const isExpense = tx.type === 'expense';
             const isIncome = tx.type === 'income';
+            const categoryDisplayName =
+              language === 'bn' ? (tx.categoryNameBn || tx.categoryName) : (tx.categoryName || tx.categoryNameBn);
 
             return (
               <button
@@ -225,7 +226,7 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
                     {formatCurrency(tx.amount, currencySymbol, useBengaliDigits)}
                   </span>
                   <span className="text-[10px] text-slate-400 block mt-0.5">
-                    {language === 'bn' ? (tx.categoryNameBn || tx.categoryName) : (tx.categoryName || tx.categoryNameBn)}
+                    {categoryDisplayName}
                   </span>
                 </div>
               </button>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BarChart3, PieChart, TrendingUp, TrendingDown, Users } from 'lucide-react';
+import { TrendingUp, TrendingDown, Users } from 'lucide-react';
 import { Transaction, Category, FamilyMember } from '../../types';
 import { formatCurrency } from '../../utils/currency';
 import { useTranslation } from '../../locales/i18nContext';
@@ -79,7 +79,7 @@ export const ReportsScreen: React.FC<ReportsScreenProps> = ({
             {t('statsTitle')}
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            আর্থিক বিশ্লেষণ ও খাতের বিবরণ
+            {t('reportsSubtitle')}
           </p>
         </div>
 
@@ -91,7 +91,7 @@ export const ReportsScreen: React.FC<ReportsScreenProps> = ({
               period === 'this_month' ? 'bg-white dark:bg-slate-700 text-blue-600 shadow-xs' : 'text-slate-500'
             }`}
           >
-            চলতি মাস
+            {t('thisMonth')}
           </button>
           <button
             onClick={() => setPeriod('all')}
@@ -99,7 +99,7 @@ export const ReportsScreen: React.FC<ReportsScreenProps> = ({
               period === 'all' ? 'bg-white dark:bg-slate-700 text-blue-600 shadow-xs' : 'text-slate-500'
             }`}
           >
-            সর্বমোট
+            {t('allTime')}
           </button>
         </div>
       </div>
@@ -131,10 +131,10 @@ export const ReportsScreen: React.FC<ReportsScreenProps> = ({
       <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-xs flex items-center justify-between">
         <div>
           <span className="text-xs font-bold text-slate-500 block">
-            সঞ্চয়ের হার (Savings Rate)
+            {t('savingsRate')}
           </span>
           <span className="text-sm font-bold text-slate-800 dark:text-white block mt-0.5">
-            উদ্বৃত্ত: {formatCurrency(netSavings, currencySymbol, useBengaliDigits)}
+            {t('netSurplus')}: {formatCurrency(netSavings, currencySymbol, useBengaliDigits)}
           </span>
         </div>
         <div className="w-12 h-12 rounded-full border-4 border-blue-500 flex items-center justify-center font-extrabold text-blue-600 text-xs">
@@ -149,7 +149,7 @@ export const ReportsScreen: React.FC<ReportsScreenProps> = ({
         </h3>
 
         {sortedCategories.length === 0 ? (
-          <p className="text-xs text-slate-400 text-center py-4">কোনো ব্যয়ের তথ্য নেই</p>
+          <p className="text-xs text-slate-400 text-center py-4">{t('noExpenseData')}</p>
         ) : (
           <div className="space-y-3">
             {sortedCategories.map((cat) => (

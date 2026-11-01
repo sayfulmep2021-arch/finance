@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Download, Sparkles, RefreshCw } from 'lucide-react';
+import { Download, RefreshCw } from 'lucide-react';
 import { db, initializeDatabase } from './db';
-import { I18nProvider } from './locales/i18nContext';
+import { I18nProvider, useTranslation } from './locales/i18nContext';
 import { TabType, BottomNav } from './components/layout/BottomNav';
 import { DashboardScreen } from './components/screens/DashboardScreen';
 import { TransactionsScreen } from './components/screens/TransactionsScreen';
@@ -12,15 +12,18 @@ import { ReportsScreen } from './components/screens/ReportsScreen';
 import { SettingsScreen } from './components/screens/SettingsScreen';
 import { AddTransactionModal } from './components/modals/AddTransactionModal';
 import { AddLoanModal } from './components/modals/AddLoanModal';
-import { QuickActionSheet } from './components/modals/QuickActionSheet';
+import { QuickActionSheet, QuickActionType } from './components/modals/QuickActionSheet';
 import { NotificationsModal } from './components/modals/NotificationsModal';
 import { BackupRestoreModal } from './components/modals/BackupRestoreModal';
 import { InstallGuideModal } from './components/modals/InstallGuideModal';
 import { UserImageModal } from './components/modals/UserImageModal';
-import { Transaction, TransactionType, WalletAccount, LoanType } from './types';
+import { CategoryModal } from './components/modals/CategoryModal';
+import { Transaction, TransactionType, LoanType } from './types';
 import { ToggleFilter } from './components/dashboard/IncomeExpenseToggle';
 
 export const MainApp: React.FC = () => {
+  const { t } = useTranslation();
+
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [activeToggle, setActiveToggle] = useState<ToggleFilter>('expense'); // Matches screenshot default ("ব্যয়")
   const [dataVersion, setDataVersion] = useState<number>(0);
@@ -33,6 +36,7 @@ export const MainApp: React.FC = () => {
   const [isAddLoanOpen, setIsAddLoanOpen] = useState(false);
   const [loanModalType, setLoanModalType] = useState<LoanType>('lent');
 
+  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const [isQuickActionOpen, setIsQuickActionOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isBackupOpen, setIsBackupOpen] = useState(false);
@@ -132,15 +136,17 @@ export const MainApp: React.FC = () => {
     setDataVersion((v) => v + 1);
   };
 
-  const handleOpenQuickAdd = (type?: 'expense' | 'income' | 'transfer' | 'loan' | 'savings') => {
+  const handleOpenQuickAdd = (type?: QuickActionType) => {
     if (type === 'loan') {
       setLoanModalType('lent');
       setIsAddLoanOpen(true);
     } else if (type === 'savings') {
       setActiveTab('budget');
+    } else if (type === 'categories') {
+      setIsCategoriesOpen(true);
     } else {
       setEditingTransaction(null);
-      setTxModalType(type || 'expense');
+      setTxModalType((type as TransactionType) || 'expense');
       setIsAddTxOpen(true);
     }
   };
@@ -158,15 +164,15 @@ export const MainApp: React.FC = () => {
                 <RefreshCw className="w-4 h-4 text-white" />
               </div>
               <div className="min-w-0">
-                <span className="text-xs font-bold block truncate">My Finance-এর নতুন সংস্করণ প্রস্তুত!</span>
-                <span className="text-[10px] text-emerald-100 block truncate">নতুন আপডেট কার্যকর করতে রিলোড করুন</span>
+                <span className="text-xs font-bold block truncate">{t('newVersionReady')}</span>
+                <span className="text-[10px] text-emerald-100 block truncate">{t('reloadToApply')}</span>
               </div>
             </div>
             <button
               onClick={() => window.location.reload()}
               className="flex-shrink-0 px-3.5 py-1.5 bg-white hover:bg-emerald-50 text-emerald-800 text-xs font-black rounded-xl shadow-sm active:scale-95 transition-all"
             >
-              রিলোড
+              {t('reloadApp')}
             </button>
           </div>
         )}
@@ -179,15 +185,15 @@ export const MainApp: React.FC = () => {
                 <Download className="w-4 h-4 text-white" />
               </div>
               <div className="min-w-0">
-                <span className="text-xs font-bold block truncate">ফোনে অ্যাপ ইনস্টল করুন</span>
-                <span className="text-[10px] text-blue-100 block truncate">ইন্টারনেট ছাড়া অফলাইনে ব্যবহার করুন</span>
+                <span className="text-xs font-bold block truncate">{t('installBannerTitle')}</span>
+                <span className="text-[10px] text-blue-100 block truncate">{t('installBannerSub')}</span>
               </div>
             </div>
             <button
               onClick={handleInstallApp}
               className="flex-shrink-0 px-3.5 py-1.5 bg-white hover:bg-blue-50 text-blue-700 text-xs font-black rounded-xl shadow-sm active:scale-95 transition-all"
             >
-              ইনস্টল
+              {t('installBtn')}
             </button>
           </div>
         )}
@@ -286,6 +292,8 @@ export const MainApp: React.FC = () => {
               budgetWarningPercent: 80,
             }}
             members={members}
+            categories={categories}
+            onOpenCategoriesModal={() => setIsCategoriesOpen(true)}
             onOpenBackupModal={() => setIsBackupOpen(true)}
             onOpenInstallGuide={handleInstallApp}
             onOpenUserImage={() => setIsUserImageOpen(true)}
@@ -330,6 +338,16 @@ export const MainApp: React.FC = () => {
         }}
         wallets={wallets}
         initialType={loanModalType}
+      />
+
+      <CategoryModal
+        isOpen={isCategoriesOpen}
+        onClose={() => {
+          setIsCategoriesOpen(false);
+          refreshData();
+        }}
+        categories={categories}
+        onDataChanged={refreshData}
       />
 
       <NotificationsModal

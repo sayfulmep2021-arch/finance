@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Target, AlertTriangle, CheckCircle2, Plus, Edit2, ShieldAlert, PiggyBank } from 'lucide-react';
+import { Target, CheckCircle2, Edit2, ShieldAlert, PiggyBank } from 'lucide-react';
 import { db } from '../../db';
 import { Budget, Category, SavingsGoal, Transaction } from '../../types';
 import { formatCurrency, parseAmount } from '../../utils/currency';
@@ -78,7 +78,7 @@ export const BudgetScreen: React.FC<BudgetScreenProps> = ({
       setIsEditingLimit(false);
       onDataChanged();
     } catch (err: any) {
-      alert(`বাজেট সংরক্ষণে ত্রুটি: ${err.message}`);
+      alert(`${t('budgetSaveError')}: ${err.message}`);
     }
   };
 
@@ -90,7 +90,7 @@ export const BudgetScreen: React.FC<BudgetScreenProps> = ({
           {t('budgetTitle')} ({monthName})
         </h1>
         <p className="text-xs text-slate-500 mt-0.5">
-          মাসিক খরচ নিয়ন্ত্রণ ও সঞ্চয় পরিকল্পনা
+          {t('budgetSubtitle')}
         </p>
       </div>
 
@@ -105,7 +105,7 @@ export const BudgetScreen: React.FC<BudgetScreenProps> = ({
             className="flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-500"
           >
             <Edit2 className="w-3.5 h-3.5" />
-            <span>{isEditingLimit ? 'বাতিল' : 'পরিবর্তন'}</span>
+            <span>{isEditingLimit ? t('cancel') : t('change')}</span>
           </button>
         </div>
 
@@ -122,7 +122,7 @@ export const BudgetScreen: React.FC<BudgetScreenProps> = ({
               onClick={handleSaveLimit}
               className="px-4 py-2 bg-blue-600 text-white font-bold text-xs rounded-xl shadow-xs"
             >
-              সংরক্ষণ
+              {t('save')}
             </button>
           </div>
         ) : (
@@ -169,12 +169,12 @@ export const BudgetScreen: React.FC<BudgetScreenProps> = ({
           {isOverBudget ? (
             <span className="text-rose-600 font-bold flex items-center gap-1">
               <ShieldAlert className="w-3.5 h-3.5" />
-              বাজেট ছাড়িয়েছে!
+              {t('budgetOverLimitBadge')}
             </span>
           ) : (
             <span className="text-emerald-600 font-bold flex items-center gap-1">
               <CheckCircle2 className="w-3.5 h-3.5" />
-              নিয়ন্ত্রণে আছে
+              {t('budgetUnderControlBadge')}
             </span>
           )}
         </div>
@@ -192,6 +192,8 @@ export const BudgetScreen: React.FC<BudgetScreenProps> = ({
               const spent = categoryExpenses[cat.id] || 0;
               const limit = budget?.categoryLimits?.[cat.id] || (spent > 0 ? spent * 1.3 : 2000);
               const catPercent = Math.min(100, limit > 0 ? (spent / limit) * 100 : 0);
+              const displayName =
+                language === 'bn' ? cat.nameBn || cat.name : cat.name || cat.nameBn;
 
               return (
                 <div
@@ -205,7 +207,7 @@ export const BudgetScreen: React.FC<BudgetScreenProps> = ({
                         style={{ backgroundColor: cat.color }}
                       />
                       <span className="text-xs font-bold text-slate-800 dark:text-white">
-                        {cat.nameBn || cat.name}
+                        {displayName}
                       </span>
                     </div>
                     <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
@@ -234,7 +236,7 @@ export const BudgetScreen: React.FC<BudgetScreenProps> = ({
             {t('savingsTitle')}
           </h3>
           <span className="text-xs font-bold text-purple-600">
-            {savingsGoals.length}টি লক্ষ্য
+            {savingsGoals.length} {t('goalsCount')}
           </span>
         </div>
 
@@ -257,7 +259,7 @@ export const BudgetScreen: React.FC<BudgetScreenProps> = ({
                         {goal.name}
                       </h4>
                       <span className="text-[10px] text-slate-400">
-                        টার্গেট: {formatCurrency(goal.targetAmount, currencySymbol, useBengaliDigits)}
+                        {t('targetLabel')}: {formatCurrency(goal.targetAmount, currencySymbol, useBengaliDigits)}
                       </span>
                     </div>
                   </div>
@@ -273,8 +275,8 @@ export const BudgetScreen: React.FC<BudgetScreenProps> = ({
                   />
                 </div>
                 <div className="flex justify-between text-[10px] text-slate-400 font-semibold">
-                  <span>অগ্রগতি: {Math.round(progress)}%</span>
-                  {goal.targetDate && <span>শেষ তারিখ: {goal.targetDate}</span>}
+                  <span>{t('progressLabel')}: {Math.round(progress)}%</span>
+                  {goal.targetDate && <span>{t('deadlineLabel')}: {goal.targetDate}</span>}
                 </div>
               </div>
             );

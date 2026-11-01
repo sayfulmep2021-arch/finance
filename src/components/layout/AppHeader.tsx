@@ -1,7 +1,6 @@
 import React from 'react';
-import { Bell, User as UserIcon } from 'lucide-react';
+import { Bell, User as UserIcon, Globe } from 'lucide-react';
 import { useTranslation } from '../../locales/i18nContext';
-import { getGreetingKey } from '../../utils/date';
 
 interface AppHeaderProps {
   userName: string;
@@ -19,12 +18,12 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   onOpenNotifications,
   onOpenUserImage,
 }) => {
-  const { t } = useTranslation();
+  const { t, language, toggleLanguage } = useTranslation();
 
   return (
     <header className="flex items-center justify-between pt-3 pb-3 px-1 select-none">
-      {/* Location 4 & 1: Name and Smart Wallet System */}
-      <div className="min-w-0">
+      {/* User Name and Smart Wallet System badge */}
+      <div className="min-w-0 pr-2">
         <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white truncate">
           {userName || 'Sayful'}
         </h1>
@@ -35,9 +34,26 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         </div>
       </div>
 
-      {/* Location 3 & 2: Notifications Bell & Dedicated User Profile Image */}
-      <div className="flex items-center gap-2.5 flex-shrink-0">
-        {/* Location 3: Notification Bell */}
+      {/* Header Actions: Language Pill, Notification Bell, User Avatar */}
+      <div className="flex items-center gap-2 flex-shrink-0">
+        {/* Instant Bilingual Language Switcher Pill */}
+        <button
+          onClick={toggleLanguage}
+          className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-white dark:bg-slate-800 text-xs font-bold border border-slate-200 dark:border-slate-700 shadow-xs hover:border-blue-400 dark:hover:border-blue-500 transition-all focus:outline-none active:scale-95"
+          title={t('switchLanguage')}
+          aria-label={t('switchLanguage')}
+        >
+          <Globe className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+          <span className={language === 'bn' ? 'text-blue-600 dark:text-blue-400 font-extrabold' : 'text-slate-400 dark:text-slate-500 font-medium'}>
+            বাং
+          </span>
+          <span className="text-slate-300 dark:text-slate-600 text-[10px]">|</span>
+          <span className={language === 'en' ? 'text-blue-600 dark:text-blue-400 font-extrabold' : 'text-slate-400 dark:text-slate-500 font-medium'}>
+            EN
+          </span>
+        </button>
+
+        {/* Notification Bell */}
         <button
           onClick={onOpenNotifications}
           className="relative p-2.5 rounded-full text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus:outline-none active:scale-95"
@@ -50,7 +66,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           )}
         </button>
 
-        {/* Location 2: Dedicated User Image Avatar (Tap to open image upload & preview) */}
+        {/* Dedicated User Image Avatar */}
         <button
           onClick={onOpenUserImage}
           className="relative w-11 h-11 rounded-full overflow-hidden border-2 border-white dark:border-slate-700 shadow-md ring-2 ring-blue-500/20 dark:ring-blue-400/20 focus:outline-none active:scale-95 transition-transform"
@@ -73,4 +89,3 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
     </header>
   );
 };
-

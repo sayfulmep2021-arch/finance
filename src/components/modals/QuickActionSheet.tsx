@@ -5,14 +5,17 @@ import {
   ArrowLeftRight,
   HandCoins,
   PiggyBank,
+  Tag,
   X,
 } from 'lucide-react';
 import { useTranslation } from '../../locales/i18nContext';
 
+export type QuickActionType = 'expense' | 'income' | 'transfer' | 'loan' | 'savings' | 'categories';
+
 interface QuickActionSheetProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectAction: (action: 'expense' | 'income' | 'transfer' | 'loan' | 'savings') => void;
+  onSelectAction: (action: QuickActionType) => void;
 }
 
 export const QuickActionSheet: React.FC<QuickActionSheetProps> = ({
@@ -24,41 +27,54 @@ export const QuickActionSheet: React.FC<QuickActionSheetProps> = ({
 
   if (!isOpen) return null;
 
-  const actions = [
+  const actions: Array<{
+    id: QuickActionType;
+    label: string;
+    sublabel: string;
+    icon: React.ElementType;
+    color: string;
+  }> = [
     {
       id: 'expense',
-      label: 'নতুন ব্যয় যোগ করুন',
-      sublabel: 'চা, বাজার, শপিং, বিল ইত্যাদি',
+      label: t('addExpenseAction'),
+      sublabel: t('addExpenseSublabel'),
       icon: ArrowDownCircle,
       color: 'bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400',
     },
     {
       id: 'income',
-      label: 'নতুন আয় যোগ করুন',
-      sublabel: 'বেতন, ব্যবসা, ফ্রিল্যান্সিং',
+      label: t('addIncomeAction'),
+      sublabel: t('addIncomeSublabel'),
       icon: ArrowUpCircle,
       color: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400',
     },
     {
       id: 'transfer',
-      label: 'ওয়ালেট ট্রান্সফার',
-      sublabel: 'ব্যাংক থেকে বিকাশ / ক্যাশ ইত্যাদিতে',
+      label: t('transferAction'),
+      sublabel: t('transferSublabel'),
       icon: ArrowLeftRight,
       color: 'bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400',
     },
     {
       id: 'loan',
-      label: 'ধার দেওয়া / নেওয়া (ঋণ)',
-      sublabel: 'পাওনা বা দেনার হিসাব রাখুন',
+      label: t('loanAction'),
+      sublabel: t('loanSublabel'),
       icon: HandCoins,
       color: 'bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400',
     },
     {
       id: 'savings',
-      label: 'সঞ্চয়ের লক্ষ্য',
-      sublabel: 'নতুন টার্গেট বা টাকা জমা/উত্তোলন',
+      label: t('savingsAction'),
+      sublabel: t('savingsSublabel'),
       icon: PiggyBank,
       color: 'bg-purple-50 text-purple-600 dark:bg-purple-950/50 dark:text-purple-400',
+    },
+    {
+      id: 'categories',
+      label: t('manageCategoriesAction'),
+      sublabel: t('manageCategoriesSublabel'),
+      icon: Tag,
+      color: 'bg-cyan-50 text-cyan-600 dark:bg-cyan-950/50 dark:text-cyan-400',
     },
   ];
 
@@ -85,7 +101,7 @@ export const QuickActionSheet: React.FC<QuickActionSheetProps> = ({
                 key={act.id}
                 onClick={() => {
                   onClose();
-                  onSelectAction(act.id as any);
+                  onSelectAction(act.id);
                 }}
                 className="w-full flex items-center gap-3.5 p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors text-left focus:outline-none active:scale-[0.99]"
               >

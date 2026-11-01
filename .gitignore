@@ -25,6 +25,7 @@ Thumbs.db
 
 # Temporary / Agent files
 .gemini
+chrome_inspect
 
 # Financial Data & Privacy Protection
 *backup*.json

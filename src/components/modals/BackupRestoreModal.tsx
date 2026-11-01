@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { X, Download, Upload, FileSpreadsheet, AlertTriangle, Check, RefreshCw } from 'lucide-react';
+import { X, Download, Upload, FileSpreadsheet, AlertTriangle, Check } from 'lucide-react';
 import { exportFullBackup, exportTransactionsCsv, importBackup, resetAllData } from '../../utils/exportImport';
 import { Transaction } from '../../types';
 import { useTranslation } from '../../locales/i18nContext';
@@ -28,18 +28,18 @@ export const BackupRestoreModal: React.FC<BackupRestoreModalProps> = ({
   const handleExportJson = async () => {
     try {
       await exportFullBackup();
-      setStatusMessage({ text: 'সফলভাবে সম্পূর্ণ ব্যাকআপ ফাইল (JSON) ডাউনলোড হয়েছে!', isError: false });
+      setStatusMessage({ text: t('backupExportSuccess'), isError: false });
     } catch (err: any) {
-      setStatusMessage({ text: `ব্যাকআপ ত্রুটি: ${err.message}`, isError: true });
+      setStatusMessage({ text: `${t('backupExportError')}: ${err.message}`, isError: true });
     }
   };
 
   const handleExportCsv = () => {
     try {
       exportTransactionsCsv(transactions);
-      setStatusMessage({ text: 'সফলভাবে লেনদেন CSV ফাইল এক্সপোর্ট হয়েছে!', isError: false });
+      setStatusMessage({ text: t('csvExportSuccess'), isError: false });
     } catch (err: any) {
-      setStatusMessage({ text: `CSV ত্রুটি: ${err.message}`, isError: true });
+      setStatusMessage({ text: `${t('csvExportError')}: ${err.message}`, isError: true });
     }
   };
 
@@ -52,7 +52,7 @@ export const BackupRestoreModal: React.FC<BackupRestoreModalProps> = ({
       const content = event.target?.result as string;
       if (!content) return;
 
-      if (!confirm('আপনি কি এই ব্যাকআপ ফাইলটি রিস্টোর করতে চান? আপনার পূর্বের ডেটা প্রতিস্থাপিত হবে।')) {
+      if (!confirm(t('restoreConfirm'))) {
         return;
       }
 
@@ -72,13 +72,13 @@ export const BackupRestoreModal: React.FC<BackupRestoreModalProps> = ({
     try {
       await resetAllData();
       setIsResetConfirmOpen(false);
-      setStatusMessage({ text: 'সকল ডেটা মুছে ফেলা হয়েছে। অ্যাপটি নতুনভাবে প্রস্তুত।', isError: false });
+      setStatusMessage({ text: t('resetAllSuccess'), isError: false });
       onDataChanged();
       setTimeout(() => {
         window.location.reload();
       }, 1000);
     } catch (err: any) {
-      setStatusMessage({ text: `রিসেট ত্রুটি: ${err.message}`, isError: true });
+      setStatusMessage({ text: `${t('resetError')}: ${err.message}`, isError: true });
     }
   };
 
@@ -115,7 +115,7 @@ export const BackupRestoreModal: React.FC<BackupRestoreModalProps> = ({
 
           {/* Privacy Note */}
           <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-            আপনার সকল আর্থিক হিসাব আপনার নিজস্ব ডিভাইসে IndexedDB-তে সুরক্ষিত। ফোন পরিবর্তন বা ব্রাউজার পরিষ্কার করার আগে ব্যাকআপ ডাউনলোড করে রাখা নিরাপদ।
+            {t('backupPrivacyNotice')}
           </p>
 
           {/* Backup Action Cards */}
@@ -130,10 +130,10 @@ export const BackupRestoreModal: React.FC<BackupRestoreModalProps> = ({
               </div>
               <div>
                 <span className="block text-sm font-bold text-slate-800 dark:text-white">
-                  সম্পূর্ণ ব্যাকআপ ডাউনলোড (JSON)
+                  {t('exportJsonTitle')}
                 </span>
                 <span className="text-[11px] text-slate-500 block">
-                  সকল ওয়ালেট, হিসাব, ঋণ ও বাজেট সংরক্ষণ করুন
+                  {t('exportJsonSub')}
                 </span>
               </div>
             </button>
@@ -148,10 +148,10 @@ export const BackupRestoreModal: React.FC<BackupRestoreModalProps> = ({
               </div>
               <div>
                 <span className="block text-sm font-bold text-slate-800 dark:text-white">
-                  এক্সেল ফাইল এক্সপোর্ট (CSV)
+                  {t('exportCsvTitle')}
                 </span>
                 <span className="text-[11px] text-slate-500 block">
-                  Excel বা Google Sheets-এ লেনদেন দেখুন
+                  {t('exportCsvSub')}
                 </span>
               </div>
             </button>
@@ -173,10 +173,10 @@ export const BackupRestoreModal: React.FC<BackupRestoreModalProps> = ({
               </div>
               <div>
                 <span className="block text-sm font-bold text-slate-800 dark:text-white">
-                  ব্যাকআপ ফাইল আপলোড (Restore)
+                  {t('importJsonTitle')}
                 </span>
                 <span className="text-[11px] text-slate-500 block">
-                  পূর্বের সেভ করা JSON ফাইল থেকে ফিরিয়ে আনুন
+                  {t('importJsonSub')}
                 </span>
               </div>
             </button>
@@ -188,20 +188,20 @@ export const BackupRestoreModal: React.FC<BackupRestoreModalProps> = ({
               <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900/50 space-y-3">
                 <div className="flex items-center gap-2 text-rose-600 font-bold text-xs">
                   <AlertTriangle className="w-4 h-4" />
-                  <span>আপনি কি নিশ্চিত যে সকল ডেটা মুছে ফেলতে চান?</span>
+                  <span>{t('resetConfirmPrompt')}</span>
                 </div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setIsResetConfirmOpen(false)}
                     className="flex-1 py-2 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-slate-700"
                   >
-                    বাতিল
+                    {t('cancel')}
                   </button>
                   <button
                     onClick={handleReset}
                     className="flex-1 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold"
                   >
-                    হ্যাঁ, মুছে ফেলুন
+                    {t('yesDelete')}
                   </button>
                 </div>
               </div>

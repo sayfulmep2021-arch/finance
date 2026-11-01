@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, HandCoins, CheckCircle2, Clock, Phone, AlertCircle, ArrowDownLeft, ArrowUpRight } from 'lucide-react';
+import { Plus, HandCoins, Phone, ArrowDownLeft, ArrowUpRight } from 'lucide-react';
 import { db } from '../../db';
 import { Loan, WalletAccount } from '../../types';
 import { formatCurrency, parseAmount } from '../../utils/currency';
@@ -52,7 +52,7 @@ export const LoansScreen: React.FC<LoansScreenProps> = ({
     const remaining = selectedLoanForRepayment.amount - selectedLoanForRepayment.repaidAmount;
 
     if (amount <= 0 || amount > remaining) {
-      alert('সঠিক পরিশোধের পরিমাণ দিন (বকেয়ার চেয়ে বেশি হওয়া যাবে না)');
+      alert(t('validRepaymentError'));
       return;
     }
 
@@ -78,8 +78,6 @@ export const LoansScreen: React.FC<LoansScreenProps> = ({
         });
 
         // Update wallet
-        // Lent: when borrower repays us, wallet increases
-        // Borrowed: when we repay lender, wallet decreases
         const wallet = await db.wallets.get(repaymentWalletId);
         if (wallet) {
           if (selectedLoanForRepayment.type === 'lent') {
@@ -94,7 +92,7 @@ export const LoansScreen: React.FC<LoansScreenProps> = ({
       setRepaymentAmount('');
       onDataChanged();
     } catch (err: any) {
-      alert(`পরিশোধ সংরক্ষণে ত্রুটি: ${err.message}`);
+      alert(`${t('repaymentSaveError')}: ${err.message}`);
     }
   };
 
@@ -107,7 +105,7 @@ export const LoansScreen: React.FC<LoansScreenProps> = ({
             {t('loansTitle')}
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            পাওনা ও দেনার সঠিক হিসাব
+            {t('loansSubtitle')}
           </p>
         </div>
         <button
@@ -115,7 +113,7 @@ export const LoansScreen: React.FC<LoansScreenProps> = ({
           className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-sm active:scale-95 transition-all"
         >
           <Plus className="w-4 h-4 stroke-[3]" />
-          <span>নতুন ধার</span>
+          <span>{t('addNewLoan')}</span>
         </button>
       </div>
 
@@ -133,7 +131,7 @@ export const LoansScreen: React.FC<LoansScreenProps> = ({
             {formatCurrency(totalLentRemaining, currencySymbol, useBengaliDigits)}
           </span>
           <span className="text-[11px] text-amber-700 dark:text-amber-400 block mt-0.5">
-            অন্যদের কাছে আপনার পাওনা
+            {t('lentReceivableSubtitle')}
           </span>
         </div>
 
@@ -149,7 +147,7 @@ export const LoansScreen: React.FC<LoansScreenProps> = ({
             {formatCurrency(totalBorrowedRemaining, currencySymbol, useBengaliDigits)}
           </span>
           <span className="text-[11px] text-purple-700 dark:text-purple-400 block mt-0.5">
-            অন্যদের কাছে আপনার দেনা
+            {t('borrowedPayableSubtitle')}
           </span>
         </div>
       </div>
@@ -193,7 +191,7 @@ export const LoansScreen: React.FC<LoansScreenProps> = ({
         {filteredLoans.length === 0 ? (
           <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
             <HandCoins className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
-            <p className="text-xs font-medium text-slate-400">কোনো ধারের রেকর্ড পাওয়া যায়নি</p>
+            <p className="text-xs font-medium text-slate-400">{t('noLoansFound')}</p>
           </div>
         ) : (
           filteredLoans.map((loan) => {
@@ -221,7 +219,7 @@ export const LoansScreen: React.FC<LoansScreenProps> = ({
                             : 'bg-purple-100 text-purple-800 dark:bg-purple-950/50 dark:text-purple-300'
                         }`}
                       >
-                        {isLent ? 'পাওনা' : 'দেনা'}
+                        {isLent ? t('lent') : t('borrowed')}
                       </span>
                     </div>
                     {loan.personPhone && (
@@ -237,7 +235,7 @@ export const LoansScreen: React.FC<LoansScreenProps> = ({
                       {formatCurrency(remaining, currencySymbol, useBengaliDigits)}
                     </span>
                     <span className="text-[10px] text-slate-400 block">
-                      মূল: {formatCurrency(loan.amount, currencySymbol, useBengaliDigits)}
+                      {t('loanPrincipal')}: {formatCurrency(loan.amount, currencySymbol, useBengaliDigits)}
                     </span>
                   </div>
                 </div>
@@ -257,8 +255,8 @@ export const LoansScreen: React.FC<LoansScreenProps> = ({
                     />
                   </div>
                   <div className="flex justify-between items-center text-[10px] text-slate-400 mt-1 font-medium">
-                    <span>পরিশোধিত: {formatCurrency(loan.repaidAmount, currencySymbol, useBengaliDigits)}</span>
-                    {loan.dueDate && <span>মেয়াদ: {loan.dueDate}</span>}
+                    <span>{t('loanRepaid')}: {formatCurrency(loan.repaidAmount, currencySymbol, useBengaliDigits)}</span>
+                    {loan.dueDate && <span>{t('loanDueDate')}: {loan.dueDate}</span>}
                   </div>
                 </div>
 
@@ -266,7 +264,7 @@ export const LoansScreen: React.FC<LoansScreenProps> = ({
                 {!isSettled && (
                   <div className="flex items-center justify-between pt-1 border-t border-slate-50 dark:border-slate-700/50">
                     <span className="text-[11px] text-slate-500">
-                      {loan.notes || 'কোনো মন্তব্য নেই'}
+                      {loan.notes || t('noNotes')}
                     </span>
                     <button
                       onClick={() => {
@@ -291,19 +289,19 @@ export const LoansScreen: React.FC<LoansScreenProps> = ({
           <div className="w-full max-w-sm bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-2xl space-y-4 animate-scaleIn">
             <h3 className="text-base font-bold text-slate-900 dark:text-white">
               {selectedLoanForRepayment.type === 'lent'
-                ? 'পাওনা টাকা ফেরত গ্রহণ'
-                : 'দেনা টাকা পরিশোধ'}
+                ? t('receiveRepayment')
+                : t('payRepayment')}
             </h3>
             <p className="text-xs text-slate-500">
-              ব্যক্তি: <strong className="text-slate-800 dark:text-slate-200">{selectedLoanForRepayment.personName}</strong>
+              {t('repaymentPerson')}: <strong className="text-slate-800 dark:text-slate-200">{selectedLoanForRepayment.personName}</strong>
               <br />
-              অবশিষ্ট বকেয়া: <strong className="text-blue-600">{formatCurrency(selectedLoanForRepayment.amount - selectedLoanForRepayment.repaidAmount, currencySymbol)}</strong>
+              {t('repaymentRemaining')}: <strong className="text-blue-600">{formatCurrency(selectedLoanForRepayment.amount - selectedLoanForRepayment.repaidAmount, currencySymbol)}</strong>
             </p>
 
             <form onSubmit={handleRepay} className="space-y-3">
               <div>
                 <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">
-                  পরিশোধের পরিমাণ (৳)
+                  {t('repaymentAmountLabel')}
                 </label>
                 <input
                   type="text"
@@ -317,7 +315,7 @@ export const LoansScreen: React.FC<LoansScreenProps> = ({
 
               <div>
                 <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">
-                  যে ওয়ালেটে সমন্বয় হবে
+                  {t('adjustWallet')}
                 </label>
                 <select
                   value={repaymentWalletId}

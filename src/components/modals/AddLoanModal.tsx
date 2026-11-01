@@ -30,17 +30,26 @@ export const AddLoanModal: React.FC<AddLoanModalProps> = ({
   const [notes, setNotes] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
+  React.useEffect(() => {
+    if (isOpen) {
+      setType(initialType);
+      if (wallets.length > 0 && !walletId) {
+        setWalletId(wallets[0].id);
+      }
+    }
+  }, [isOpen, initialType, wallets]);
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsedAmount = parseAmount(amount);
     if (parsedAmount <= 0) {
-      alert('সঠিক টাকার পরিমাণ দিন');
+      alert(t('enterValidAmount'));
       return;
     }
     if (!personName.trim()) {
-      alert('ব্যক্তির নাম দিন');
+      alert(t('enterPersonName'));
       return;
     }
 
@@ -76,7 +85,7 @@ export const AddLoanModal: React.FC<AddLoanModalProps> = ({
 
       onClose();
     } catch (err: any) {
-      alert(`ধার সংরক্ষণে ত্রুটি: ${err.message}`);
+      alert(`${t('loanSaveError')}: ${err.message}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -157,7 +166,7 @@ export const AddLoanModal: React.FC<AddLoanModalProps> = ({
                 type="text"
                 value={personName}
                 onChange={(e) => setPersonName(e.target.value)}
-                placeholder="ব্যক্তির নাম..."
+                placeholder={t('personNamePlaceholder')}
                 required
                 className="w-full px-3 py-2 text-xs font-bold text-slate-800 dark:text-white bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
               />
@@ -179,7 +188,7 @@ export const AddLoanModal: React.FC<AddLoanModalProps> = ({
           {/* Wallet */}
           <div>
             <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">
-              ওয়ালেট / একাউন্ট *
+              {t('walletAccount')} *
             </label>
             <select
               value={walletId}
@@ -229,7 +238,7 @@ export const AddLoanModal: React.FC<AddLoanModalProps> = ({
               type="text"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="উদ্দেশ্য বা বিশেষ শর্ত..."
+              placeholder={t('loanNotesPlaceholder')}
               className="w-full px-4 py-2 text-xs font-medium text-slate-800 dark:text-white bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
           </div>

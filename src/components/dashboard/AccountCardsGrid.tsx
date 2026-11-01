@@ -2,6 +2,7 @@ import React from 'react';
 import { CreditCard, Smartphone, Plus } from 'lucide-react';
 import { WalletAccount } from '../../types';
 import { formatCurrency } from '../../utils/currency';
+import { useTranslation } from '../../locales/i18nContext';
 
 interface AccountCardsGridProps {
   wallets: WalletAccount[];
@@ -18,6 +19,7 @@ export const AccountCardsGrid: React.FC<AccountCardsGridProps> = ({
   onSelectWallet,
   onAddWallet,
 }) => {
+  const { t } = useTranslation();
   // Filter for secondary wallets like EBL and Bkash, or all non-main
   const secondaryWallets = wallets.filter((w) => w.id !== 'wallet_main');
 
@@ -76,7 +78,7 @@ export const AccountCardsGrid: React.FC<AccountCardsGridProps> = ({
           className="flex items-center justify-center gap-2 p-3.5 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-blue-400 text-slate-500 hover:text-blue-600 text-xs font-semibold transition-colors"
         >
           <Plus className="w-4 h-4" />
-          <span>ওয়ালেট যোগ করুন</span>
+          <span>{t('addWallet')}</span>
         </button>
       )}
     </div>
