@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bell, User as UserIcon, Globe } from 'lucide-react';
+import { Bell, User as UserIcon, Globe, Settings as SettingsIcon } from 'lucide-react';
 import { useTranslation } from '../../locales/i18nContext';
 
 interface AppHeaderProps {
@@ -17,13 +17,14 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   hasUnreadAlerts = false,
   onOpenNotifications,
   onOpenUserImage,
+  onOpenSettings,
 }) => {
   const { t, language, toggleLanguage } = useTranslation();
 
   return (
     <header className="flex items-center justify-between pt-3 pb-3 px-1 select-none">
       {/* User Name and Smart Wallet System badge */}
-      <div className="min-w-0 pr-2">
+      <div className="min-w-0 pr-1">
         <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white truncate">
           {userName || 'Sayful'}
         </h1>
@@ -34,8 +35,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         </div>
       </div>
 
-      {/* Header Actions: Language Pill, Notification Bell, User Avatar */}
-      <div className="flex items-center gap-2 flex-shrink-0">
+      {/* Header Actions: Language Pill, Settings, Notification Bell, User Avatar */}
+      <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
         {/* Instant Bilingual Language Switcher Pill */}
         <button
           onClick={toggleLanguage}
@@ -53,23 +54,35 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           </span>
         </button>
 
+        {/* Settings Shortcut Button */}
+        {onOpenSettings && (
+          <button
+            onClick={onOpenSettings}
+            className="p-2 rounded-full text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus:outline-none active:scale-95"
+            aria-label={t('settingsTitle')}
+            title={t('settingsTitle')}
+          >
+            <SettingsIcon className="w-4 h-4" />
+          </button>
+        )}
+
         {/* Notification Bell */}
         <button
           onClick={onOpenNotifications}
-          className="relative p-2.5 rounded-full text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus:outline-none active:scale-95"
+          className="relative p-2 rounded-full text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus:outline-none active:scale-95"
           aria-label={t('notificationsAndAlerts')}
           title={t('notificationsAndAlerts')}
         >
-          <Bell className="w-5 h-5" strokeWidth={2.2} />
+          <Bell className="w-4 h-4" strokeWidth={2.2} />
           {hasUnreadAlerts && (
-            <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white dark:ring-slate-900 animate-pulse" />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white dark:ring-slate-900 animate-pulse" />
           )}
         </button>
 
         {/* Dedicated User Image Avatar */}
         <button
           onClick={onOpenUserImage}
-          className="relative w-11 h-11 rounded-full overflow-hidden border-2 border-white dark:border-slate-700 shadow-md ring-2 ring-blue-500/20 dark:ring-blue-400/20 focus:outline-none active:scale-95 transition-transform"
+          className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-white dark:border-slate-700 shadow-md ring-2 ring-blue-500/20 dark:ring-blue-400/20 focus:outline-none active:scale-95 transition-transform"
           aria-label={t('userProfilePhoto')}
           title={t('userProfilePhoto')}
         >
@@ -81,7 +94,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white">
-              <UserIcon className="w-5 h-5 stroke-[2.2]" />
+              <UserIcon className="w-4 h-4 stroke-[2.2]" />
             </div>
           )}
         </button>
