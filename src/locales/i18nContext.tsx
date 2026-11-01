@@ -16,17 +16,23 @@ const I18nContext = createContext<I18nContextType | undefined>(undefined);
 
 export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>(() => {
-    return (localStorage.getItem('app_language') as Language) || 'bn';
+    const saved = localStorage.getItem('app_language') as Language | null;
+    return saved === 'en' || saved === 'bn' ? saved : 'bn';
   });
 
-  // Load language preference from DB on start if available
+  // Keep DB and localStorage synchronized
   useEffect(() => {
-    db.settings.get('app_settings').then((settings) => {
-      if (settings?.language && (settings.language === 'bn' || settings.language === 'en')) {
-        setLanguageState(settings.language as Language);
-        localStorage.setItem('app_language', settings.language);
-      }
-    }).catch(() => {});
+    const saved = localStorage.getItem('app_language') as Language | null;
+    if (saved === 'en' || saved === 'bn') {
+      db.settings.update('app_settings', { language: saved }).catch(() => {});
+    } else {
+      db.settings.get('app_settings').then((s) => {
+        if (s?.language && (s.language === 'en' || s.language === 'bn')) {
+          setLanguageState(s.language);
+          localStorage.setItem('app_language', s.language);
+        }
+      }).catch(() => {});
+    }
   }, []);
 
   const setLanguage = (lang: Language) => {
